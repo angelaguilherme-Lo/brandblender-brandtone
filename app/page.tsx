@@ -16,8 +16,8 @@ const palettes: Palette[] = [
 
 const typePairs: TypePair[] = [
   { name: "Gallery Modern", mood: "Editorial with a clean edge", display: "Instrument Serif", body: "Manrope" },
-  { name: "Quiet Classic", mood: "Literary and considered", display: "Cormorant Garamond", body: "Manrope" },
-  { name: "Modernist", mood: "Direct, graphic and contemporary", display: "Space Grotesk", body: "Manrope" },
+  { name: "Quiet Classic", mood: "Literary and considered", display: "Cormorant Garamond", body: "Libre Baskerville" },
+  { name: "Modernist", mood: "Direct, graphic and contemporary", display: "Space Grotesk", body: "IBM Plex Mono" },
 ];
 
 const tabs = [
@@ -133,11 +133,11 @@ export default function Home() {
 
       <div className="canvas-area">
         <div className="canvas-meta"><span>Live composition</span><span>{palette.name} · {pairing.name}</span></div>
-        <article className={`art-canvas ${grain ? "with-grain" : ""}`} style={canvasStyle}>
+        <article key={pairing.name} className={`art-canvas ${grain ? "with-grain" : ""}`} style={{ ...canvasStyle, fontFamily: bodyFont }} data-type-pairing={pairing.name}>
           <div className="canvas-header"><span className="canvas-brand">Atelier <i>Forma</i></span><span className="canvas-index">Collection / 04—26</span></div>
           <div className="canvas-body">
             <div className="artwork" aria-label="Abstract brand artwork"><div className={`artwork-ground ${gradient ? "gradient" : ""}`} /><span className="artwork-number">No. 18</span></div>
-            <div className="canvas-copy"><p className="canvas-kicker">Visual study · {palette.name}</p><h3 style={{ fontSize: `clamp(48px, ${typeSize / 12}vw, ${typeSize}px)` }}>{headline || "Your story starts here."}</h3><div className="canvas-notes"><p>A considered identity for ideas with texture, purpose and a point of view.</p><div><span>Direction</span><strong>{palette.note.split(" · ").slice(0, 2).join(" / ")}</strong></div></div></div>
+            <div className="canvas-copy"><p className="canvas-kicker">Visual study · {palette.name}</p><h3 style={{ fontSize: `clamp(48px, ${typeSize / 12}vw, ${typeSize}px)`, fontFamily: displayFont }}>{headline || "Your story starts here."}</h3><div className="canvas-notes"><p>A considered identity for ideas with texture, purpose and a point of view.</p><div><span>Direction</span><strong>{palette.note.split(" · ").slice(0, 2).join(" / ")}</strong></div></div></div>
           </div>
           <div className="canvas-footer"><span>Identity / Digital / Print</span></div>
         </article>
