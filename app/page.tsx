@@ -134,12 +134,12 @@ export default function Home() {
       <div className="canvas-area">
         <div className="canvas-meta"><span>Live composition</span><span>{palette.name} · {pairing.name}</span></div>
         <article className={`art-canvas ${grain ? "with-grain" : ""}`} style={canvasStyle}>
-          <div className="canvas-header"><span className="canvas-brand">Atelier <i>Forma</i></span><span className="canvas-index">Collection / 04—26</span><button style={{ color: ink }}>Enquire <span>↗</span></button></div>
+          <div className="canvas-header"><span className="canvas-brand">Atelier <i>Forma</i></span><span className="canvas-index">Collection / 04—26</span></div>
           <div className="canvas-body">
-            <div className="artwork" aria-label="Abstract brand artwork"><div className={`artwork-ground ${gradient ? "gradient" : ""}`} /><div className="artwork-sun" /><div className="artwork-arch" /><div className="artwork-line one" /><div className="artwork-line two" /><span className="artwork-number">No. 18</span></div>
+            <div className="artwork" aria-label="Abstract brand artwork"><div className={`artwork-ground ${gradient ? "gradient" : ""}`} /><span className="artwork-number">No. 18</span></div>
             <div className="canvas-copy"><p className="canvas-kicker">Visual study · {palette.name}</p><h3 style={{ fontSize: `clamp(48px, ${typeSize / 12}vw, ${typeSize}px)` }}>{headline || "Your story starts here."}</h3><div className="canvas-notes"><p>A considered identity for ideas with texture, purpose and a point of view.</p><div><span>Direction</span><strong>{palette.note.split(" · ").slice(0, 2).join(" / ")}</strong></div></div></div>
           </div>
-          <div className="canvas-footer"><span>Identity / Digital / Print</span><span>Lisbon—London</span></div>
+          <div className="canvas-footer"><span>Identity / Digital / Print</span></div>
         </article>
         <div className="canvas-actions"><div className="large-swatches">{colors.map((color, index) => <button key={`${color}-${index}`} style={{ background: color }} onClick={() => navigator.clipboard.writeText(color).then(() => announce(`${color} copied`))} aria-label={`Copy ${color}`}><span>{color}</span></button>)}</div><p><Sparkles size={13} /> Every decision updates the composition instantly.</p></div>
       </div>
@@ -150,7 +150,7 @@ export default function Home() {
       <div className="collection-grid">{palettes.slice(0, 4).map((item, index) => <button key={item.name} className="collection-card" onClick={() => { choosePalette(index); document.querySelector("#studio")?.scrollIntoView({ behavior: "smooth" }); }}><span className="collection-art" style={{ background: item.colors[3] }}><i style={{ background: item.colors[0] }} /><i style={{ background: item.colors[1] }} /><i style={{ borderColor: item.colors[4] }} /></span><span className="collection-info"><strong>{String(index + 1).padStart(2, "0")} · {item.name}</strong><small>{item.note}</small></span></button>)}</div>
     </section>
 
-    <footer id="about"><div><span className="brand-monogram">BB</span><strong>Good design begins with a point of view.</strong></div><p>BrandBlender turns colour and type into a coherent visual language—simply, accessibly and beautifully.</p><button className="button button-light" onClick={() => document.querySelector("#studio")?.scrollIntoView({ behavior: "smooth" })}>Create your system <span>↗</span></button></footer>
+    <footer id="about"><div><span className="brand-monogram">BB</span><strong>Good design begins with a point of view.</strong></div><p>BrandBlender turns colour and type into a coherent visual language—simply, accessibly and beautifully.<span className="creator-credit">Designed and developed by Angela Guilherme.</span></p><button className="button button-light" onClick={() => document.querySelector("#studio")?.scrollIntoView({ behavior: "smooth" })}>Create your system <span>↗</span></button></footer>
     <div className={`toast ${message ? "visible" : ""}`} role="status"><Check size={14} /> {message}</div>
   </main>;
 }
