@@ -1,70 +1,148 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { Check, ChevronDown, Copy, Lock, RefreshCw, Sparkles } from "lucide-react";
+import { CSSProperties, useMemo, useState } from "react";
+import { ArrowDown, Check, Copy, Download, Palette as PaletteIcon, RefreshCw, SlidersHorizontal, Sparkles, Type } from "lucide-react";
 
-const systems = {
-  Hospitality: { name: "Grounded retreat", colors: ["#173F35", "#C6FF5E", "#F3EFE7", "#FFFFFF", "#16221E"], fonts: ["Georgia", "Arial"], headline: "Space to come back to yourself.", eyebrow: "The quiet side of Portugal" },
-  Technology: { name: "Clear momentum", colors: ["#1640D6", "#C6FF5E", "#F2F5FF", "#FFFFFF", "#111827"], fonts: ["Arial", "Arial"], headline: "Build the next thing, clearly.", eyebrow: "A smarter digital foundation" },
-  Beauty: { name: "Modern ritual", colors: ["#6E203B", "#FFB7A5", "#FFF5F0", "#FFFFFF", "#2D1720"], fonts: ["Georgia", "Arial"], headline: "Care made beautifully simple.", eyebrow: "Considered formulas, visible results" },
-  Consulting: { name: "Quiet authority", colors: ["#102A43", "#FFCC4D", "#F4F7FA", "#FFFFFF", "#17212B"], fonts: ["Georgia", "Arial"], headline: "Clarity for your next move.", eyebrow: "Strategy that turns into action" },
-};
-type Industry = keyof typeof systems;
+type Palette = { name: string; note: string; colors: [string, string, string, string, string] };
+type TypePair = { name: string; mood: string; display: string; body: string };
+
+const palettes: Palette[] = [
+  { name: "Sienna Study", note: "warm · cultivated · human", colors: ["#B45132", "#E8A650", "#F0E9DB", "#FBF8F1", "#25231F"] },
+  { name: "Cobalt Paper", note: "clear · cultured · modern", colors: ["#254DB7", "#E3613E", "#D8E2F5", "#F7F3EA", "#18213A"] },
+  { name: "Botanical Ink", note: "quiet · natural · refined", colors: ["#315847", "#C77849", "#CAD5B8", "#F3EFE4", "#17231D"] },
+  { name: "Nocturne", note: "expressive · premium · bold", colors: ["#27243A", "#E27272", "#777DA7", "#F0E9DE", "#14131A"] },
+  { name: "Mineral Blue", note: "open · intelligent · calm", colors: ["#497789", "#D69255", "#BFD2D3", "#F4F0E8", "#1D2A2D"] },
+];
+
+const typePairs: TypePair[] = [
+  { name: "Gallery Modern", mood: "Editorial with a clean edge", display: "Instrument Serif", body: "Manrope" },
+  { name: "Quiet Classic", mood: "Literary and considered", display: "Cormorant Garamond", body: "Manrope" },
+  { name: "Modernist", mood: "Direct, graphic and contemporary", display: "Space Grotesk", body: "Manrope" },
+];
+
+const tabs = [
+  { id: "palette", label: "Colour", icon: PaletteIcon },
+  { id: "type", label: "Type", icon: Type },
+  { id: "finish", label: "Finish", icon: SlidersHorizontal },
+] as const;
+type Tab = (typeof tabs)[number]["id"];
+
+function hexToRgb(hex: string) {
+  const value = hex.replace("#", "");
+  return { r: parseInt(value.slice(0, 2), 16), g: parseInt(value.slice(2, 4), 16), b: parseInt(value.slice(4, 6), 16) };
+}
+function channel(value: number) { const v = value / 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }
+function luminance(hex: string) { const { r, g, b } = hexToRgb(hex); return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b); }
+function contrast(a: string, b: string) { const first = luminance(a); const second = luminance(b); return (Math.max(first, second) + 0.05) / (Math.min(first, second) + 0.05); }
+function hslToHex(h: number, s: number, l: number) {
+  const saturation = s / 100, lightness = l / 100;
+  const c = (1 - Math.abs(2 * lightness - 1)) * saturation;
+  const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+  const m = lightness - c / 2;
+  let values = [0, 0, 0];
+  if (h < 60) values = [c, x, 0]; else if (h < 120) values = [x, c, 0]; else if (h < 180) values = [0, c, x]; else if (h < 240) values = [0, x, c]; else if (h < 300) values = [x, 0, c]; else values = [c, 0, x];
+  return `#${values.map((v) => Math.round((v + m) * 255).toString(16).padStart(2, "0")).join("")}`.toUpperCase();
+}
 
 export default function Home() {
-  const [industry, setIndustry] = useState<Industry>("Hospitality");
-  const [luxury, setLuxury] = useState(76);
-  const [energy, setEnergy] = useState(34);
-  const [radius, setRadius] = useState(18);
-  const [seed, setSeed] = useState(0);
-  const [copied, setCopied] = useState(false);
-  const system = useMemo(() => systems[industry], [industry, seed]);
-  const [primary, accent, background, surface, ink] = system.colors;
-  useEffect(() => {
-    const context = (document as Document & { modelContext?: { registerTool: (tool: unknown, options?: { signal?: AbortSignal }) => void | Promise<void> } }).modelContext;
-    if (!context?.registerTool) return;
-    const lifecycle = new AbortController();
-    void Promise.resolve(context.registerTool({
-      name: "configure_brand_direction",
-      title: "Configure brand direction",
-      description: "Apply an industry and strategic tone values to the visible BrandBlender workspace.",
-      inputSchema: { type: "object", properties: { industry: { type: "string", enum: Object.keys(systems) }, luxury: { type: "number", minimum: 0, maximum: 100 }, energy: { type: "number", minimum: 0, maximum: 100 } }, required: ["industry"], additionalProperties: false },
-      annotations: { readOnlyHint: false, untrustedContentHint: false },
-      execute(input: unknown) { const value = input as { industry?: string; luxury?: number; energy?: number }; if (!value.industry || !(value.industry in systems)) throw new Error("Choose a supported industry."); setIndustry(value.industry as Industry); if (typeof value.luxury === "number") setLuxury(value.luxury); if (typeof value.energy === "number") setEnergy(value.energy); return { applied: true, industry: value.industry }; }
-    }, { signal: lifecycle.signal })).catch(() => undefined);
-    return () => lifecycle.abort();
-  }, []);
-  const copyTokens = async () => { await navigator.clipboard.writeText(`:root {\n  --brand-primary: ${primary};\n  --brand-accent: ${accent};\n  --brand-background: ${background};\n  --brand-surface: ${surface};\n  --brand-text: ${ink};\n  --font-display: '${system.fonts[0]}';\n  --font-body: '${system.fonts[1]}';\n}`); setCopied(true); setTimeout(() => setCopied(false), 1600); };
+  const [activeTab, setActiveTab] = useState<Tab>("palette");
+  const [paletteIndex, setPaletteIndex] = useState(0);
+  const [colors, setColors] = useState<[string, string, string, string, string]>(palettes[0].colors);
+  const [typeIndex, setTypeIndex] = useState(0);
+  const [headline, setHeadline] = useState("Ideas deserve a beautiful beginning.");
+  const [typeSize, setTypeSize] = useState(76);
+  const [hue, setHue] = useState(18);
+  const [angle, setAngle] = useState(132);
+  const [gradient, setGradient] = useState(true);
+  const [grain, setGrain] = useState(true);
+  const [message, setMessage] = useState("");
 
-  return <main className="min-h-screen bg-[#f6f6f3] text-[#11130f]">
-    <header className="flex h-16 items-center justify-between border-b border-black/10 bg-white px-4 sm:px-7">
-      <div className="flex items-center gap-3"><div className="logo-mark"><span>B</span></div><div><p className="text-[15px] font-bold leading-none tracking-[-.03em]">BrandBlender</p><p className="mt-1 text-[10px] font-semibold uppercase tracking-[.18em] text-black/45">BrandTone</p></div></div>
-      <div className="hidden rounded-full border border-black/10 bg-[#f6f6f3] p-1 sm:flex">{['Define','Blend','Preview'].map((item,i)=><span key={item} className={`rounded-full px-4 py-1.5 text-xs font-semibold ${i===1?'bg-black text-white':'text-black/45'}`}>{i+1}. {item}</span>)}</div>
-      <button onClick={copyTokens} className="flex items-center gap-2 rounded-full bg-black px-4 py-2 text-xs font-bold text-white hover:bg-[#1640D6]">{copied?<Check size={14}/>:<Copy size={14}/>} {copied?'Copied':'Export tokens'}</button>
+  const palette = palettes[paletteIndex], pairing = typePairs[typeIndex];
+  const [primary, accent, soft, paper, ink] = colors;
+  const ratio = useMemo(() => contrast(ink, paper), [ink, paper]);
+  const displayFont = `'${pairing.display}', Georgia, serif`, bodyFont = `'${pairing.body}', Arial, sans-serif`;
+
+  function announce(text: string) { setMessage(text); window.setTimeout(() => setMessage(""), 1800); }
+  function choosePalette(index: number) { setPaletteIndex(index); setColors(palettes[index].colors); announce(`${palettes[index].name} applied`); }
+  function changeColor(index: number, value: string) { setColors((current) => current.map((color, colorIndex) => colorIndex === index ? value.toUpperCase() : color) as typeof current); }
+  function changeHue(value: number) { setHue(value); changeColor(1, hslToHex(value, 66, 55)); }
+  function remix() { const next = (paletteIndex + 1 + Math.floor(Math.random() * (palettes.length - 1))) % palettes.length; choosePalette(next); }
+  function cssTokens() { return `:root {\n  --colour-primary: ${primary};\n  --colour-accent: ${accent};\n  --colour-soft: ${soft};\n  --colour-paper: ${paper};\n  --colour-ink: ${ink};\n  --font-display: "${pairing.display}", serif;\n  --font-body: "${pairing.body}", sans-serif;\n  --gradient-angle: ${angle}deg;\n}`; }
+  async function copyPalette() { await navigator.clipboard.writeText(colors.join(", ")); announce("Palette copied"); }
+  function exportCss() { const blob = new Blob([cssTokens()], { type: "text/css" }); const url = URL.createObjectURL(blob); const link = document.createElement("a"); link.href = url; link.download = "brandblender-tokens.css"; link.click(); URL.revokeObjectURL(url); announce("CSS exported"); }
+
+  const canvasStyle = { "--primary": primary, "--accent": accent, "--soft": soft, "--paper": paper, "--ink": ink, "--angle": `${angle}deg`, "--display-font": displayFont, "--body-font": bodyFont } as CSSProperties;
+
+  return <main className="site-shell">
+    <header className="topbar">
+      <a href="#top" className="brand" aria-label="BrandBlender home"><span className="brand-monogram">BB</span><span>BrandBlender <em>BrandTone</em></span></a>
+      <nav className="topnav" aria-label="Page sections"><a href="#studio">Studio</a><a href="#collections">Collections</a><a href="#about">About</a></nav>
+      <button className="button button-dark" onClick={exportCss}><Download size={15} /> Export CSS</button>
     </header>
-    <section className="grid min-h-[calc(100vh-64px)] grid-cols-1 lg:grid-cols-[390px_1fr]">
-      <aside className="border-r border-black/10 bg-white p-5 sm:p-7">
-        <div className="mb-7"><p className="section-label">Brand brief</p><h1 className="mt-2 text-3xl font-semibold tracking-[-.045em]">What should your brand feel like?</h1><p className="mt-3 text-[15px] leading-6 text-black/55">Turn positioning into a visual system—not a random palette.</p></div>
-        <label className="field-label">Describe the brand</label><textarea className="input min-h-24 resize-none" defaultValue="A premium eco-retreat in Portugal for design-conscious travellers who value calm and nature." />
-        <div className="mt-5 grid grid-cols-2 gap-3"><label><span className="field-label">Industry</span><div className="relative"><select value={industry} onChange={e=>setIndustry(e.target.value as Industry)} className="input appearance-none pr-8">{Object.keys(systems).map(x=><option key={x}>{x}</option>)}</select><ChevronDown className="pointer-events-none absolute right-3 top-3.5" size={15}/></div></label><label><span className="field-label">Audience</span><select className="input"><option>Premium B2C</option><option>Modern B2B</option><option>Mass market</option></select></label></div>
-        <div className="mt-6 space-y-5"><Range label="Accessible ↔ Luxury" value={luxury} setValue={setLuxury}/><Range label="Calm ↔ Energetic" value={energy} setValue={setEnergy}/><Range label="Sharp ↔ Soft" value={radius*3} setValue={v=>setRadius(Math.round(v/3))}/></div>
-        <div className="mt-7 border-t border-black/10 pt-6"><p className="field-label">Keep while remixing</p><div className="mt-3 flex flex-wrap gap-2"><Pill>Primary color</Pill><Pill>Typography</Pill><button className="rounded-full border border-dashed border-black/20 px-3 py-2 text-xs font-semibold text-black/50">+ Add lock</button></div></div>
-        <button onClick={()=>setSeed(x=>x+1)} className="mt-7 flex w-full items-center justify-center gap-2 rounded-xl bg-[#c6ff5e] px-4 py-3.5 text-sm font-extrabold hover:brightness-95"><RefreshCw size={16}/> Remix direction</button>
-      </aside>
-      <div className="min-w-0 p-4 sm:p-7 lg:p-9">
-        <div className="mb-5 flex flex-wrap items-end justify-between gap-4"><div><p className="section-label">Generated direction 01</p><h2 className="mt-1 text-2xl font-semibold tracking-[-.04em]">{system.name}</h2></div><div className="flex items-center gap-2 rounded-full border border-black/10 bg-white px-3 py-2 text-xs font-semibold"><span className="h-2 w-2 rounded-full bg-green-500"/> Brand fit <strong>{88+Math.round((luxury+energy)/20)}%</strong></div></div>
-        <div className="grid gap-5 xl:grid-cols-[1fr_250px]">
-          <div className="preview-shell overflow-hidden border border-black/10 bg-white shadow-[0_20px_70px_rgba(16,18,14,.08)]" style={{borderRadius:radius}}><div className="flex h-11 items-center gap-2 border-b border-black/10 bg-[#f8f8f6] px-4"><i/><i/><i/><span className="ml-3 text-[10px] font-semibold text-black/35">live brand interface</span></div>
-            <div style={{background,color:ink,fontFamily:system.fonts[1]}}><nav className="flex items-center justify-between px-6 py-5 sm:px-9"><strong className="text-sm tracking-tight">Serra Quiet</strong><div className="hidden gap-6 text-[11px] font-bold sm:flex"><span>STAY</span><span>EXPERIENCE</span><span>JOURNAL</span></div><button className="px-4 py-2 text-[11px] font-bold" style={{background:primary,color:'white',borderRadius:Math.max(6,radius-5)}}>BOOK A STAY</button></nav>
-              <div className="grid min-h-[440px] grid-cols-1 md:grid-cols-[1.15fr_.85fr]"><div className="flex flex-col justify-center px-7 py-12 sm:px-12"><p className="mb-5 text-[10px] font-extrabold uppercase tracking-[.2em]" style={{color:primary}}>{system.eyebrow}</p><h3 className="max-w-[560px] text-[clamp(2.8rem,6vw,5.8rem)] leading-[.89] tracking-[-.055em]" style={{fontFamily:system.fonts[0]}}>{system.headline}</h3><p className="mt-7 max-w-md text-sm leading-6 opacity-65">Thoughtful stays, local rituals and restorative landscapes—designed for the pace you actually need.</p><div className="mt-8 flex items-center gap-4"><button className="px-5 py-3 text-xs font-extrabold" style={{background:accent,color:ink,borderRadius:Math.max(6,radius-4)}}>DISCOVER THE RETREAT</button><span className="text-xs font-bold underline underline-offset-4">Explore rooms</span></div></div><div className="relative m-4 min-h-72 overflow-hidden" style={{background:primary,borderRadius:Math.max(8,radius-3)}}><div className="absolute inset-0 opacity-90" style={{background:`radial-gradient(circle at 75% 25%, ${accent} 0 7%, transparent 7.5%), linear-gradient(145deg, transparent 0 45%, ${accent} 45.5% 47%, transparent 47.5%), radial-gradient(ellipse at 50% 100%, ${surface}22 0 40%, transparent 41%)`}}/><div className="absolute bottom-6 left-6 right-6 border-t border-white/30 pt-4 text-white"><p className="text-[10px] font-bold uppercase tracking-[.18em] opacity-70">Featured stay</p><p className="mt-1 text-lg" style={{fontFamily:system.fonts[0]}}>The hillside house</p></div></div></div>
-            </div></div>
-          <div className="space-y-4"><Panel title="Color system"><div className="mt-3 flex overflow-hidden rounded-lg">{system.colors.map((c,i)=><button key={c} aria-label={`Copy ${c}`} onClick={()=>navigator.clipboard.writeText(c)} className="group relative h-20 flex-1" style={{background:c}}><span className="absolute inset-x-0 bottom-1 text-[8px] font-bold opacity-0 mix-blend-difference transition group-hover:opacity-100" style={{color:'white'}}>{i+1}</span></button>)}</div><div className="mt-3 grid grid-cols-2 gap-y-2 text-[10px] font-semibold text-black/50"><span>Primary {primary}</span><span>Accent {accent}</span><span>Canvas {background}</span><span>Ink {ink}</span></div></Panel><Panel title="Type pairing"><p className="mt-3 text-3xl tracking-[-.04em]" style={{fontFamily:system.fonts[0]}}>Aa</p><p className="mt-2 text-sm font-bold">{system.fonts[0]}</p><p className="text-xs text-black/45">Display · 400</p><div className="my-4 h-px bg-black/10"/><p className="text-xl" style={{fontFamily:system.fonts[1]}}>Ag</p><p className="mt-2 text-sm font-bold">{system.fonts[1]}</p><p className="text-xs text-black/45">Body & UI · 400–700</p></Panel><Panel title="Effectiveness"><Score label="Accessibility" value={96}/><Score label="Type harmony" value={91}/><Score label="CTA visibility" value={94}/></Panel></div>
+
+    <section className="intro" id="top">
+      <div><p className="kicker">A visual identity atelier</p><h1>Find your brand’s<br /><i>true colours.</i></h1></div>
+      <div className="intro-copy"><p>Curated colour and typography systems for brands that want to feel considered—not generated.</p><a href="#studio">Enter the studio <ArrowDown size={15} /></a></div>
+      <div className="edition-mark" aria-hidden="true"><span>01</span><small>Edition</small></div>
+    </section>
+
+    <section className="studio" id="studio">
+      <aside className="tool-panel">
+        <div className="panel-heading"><div><p className="kicker">The mixing desk</p><h2>Compose your system</h2></div><button className="icon-button" onClick={remix} aria-label="Remix visual direction" title="Remix direction"><RefreshCw size={16} /></button></div>
+        <div className="tabs" role="tablist" aria-label="Design controls">
+          {tabs.map(({ id, label, icon: Icon }) => <button key={id} role="tab" aria-selected={activeTab === id} className={activeTab === id ? "active" : ""} onClick={() => setActiveTab(id)}><Icon size={14} /> {label}</button>)}
         </div>
+
+        {activeTab === "palette" && <div className="tab-content" role="tabpanel">
+          <div className="control-title"><span>Curated palettes</span><small>{paletteIndex + 1} / {palettes.length}</small></div>
+          <div className="palette-list">{palettes.map((item, index) => <button key={item.name} className={`palette-row ${paletteIndex === index ? "selected" : ""}`} onClick={() => choosePalette(index)}><span className="mini-colors">{item.colors.slice(0, 4).map((color) => <i key={color} style={{ background: color }} />)}</span><span><strong>{item.name}</strong><small>{item.note}</small></span>{paletteIndex === index && <Check size={15} />}</button>)}</div>
+          <div className="control-title space-above"><span>Edit swatches</span><button onClick={copyPalette}><Copy size={12} /> Copy all</button></div>
+          <div className="swatch-grid">{colors.map((color, index) => <label key={`${index}-${color}`} className="swatch-field"><input type="color" value={color} onChange={(event) => changeColor(index, event.target.value)} aria-label={`Edit ${["primary", "accent", "soft", "paper", "ink"][index]} colour`} /><span>{color}</span></label>)}</div>
+          <label className="range-control wheel-control"><span><b>Accent hue</b><small>{hue}°</small></span><div className="wheel-row"><i className="colour-wheel" /><input type="range" min="0" max="359" value={hue} onChange={(event) => changeHue(Number(event.target.value))} /></div></label>
+        </div>}
+
+        {activeTab === "type" && <div className="tab-content" role="tabpanel">
+          <label className="text-control"><span>Preview text</span><textarea value={headline} maxLength={64} onChange={(event) => setHeadline(event.target.value)} /></label>
+          <div className="control-title space-above"><span>Font pairings</span><small>Curated</small></div>
+          <div className="type-list">{typePairs.map((pair, index) => <button key={pair.name} onClick={() => { setTypeIndex(index); announce(`${pair.name} applied`); }} className={typeIndex === index ? "selected" : ""}><span className="type-glyph" style={{ fontFamily: `'${pair.display}', serif` }}>Ag</span><span><strong>{pair.name}</strong><small>{pair.display} + {pair.body}</small><em>{pair.mood}</em></span>{typeIndex === index && <Check size={15} />}</button>)}</div>
+          <label className="range-control space-above"><span><b>Display size</b><small>{typeSize}px</small></span><input type="range" min="48" max="104" value={typeSize} onChange={(event) => setTypeSize(Number(event.target.value))} /></label>
+        </div>}
+
+        {activeTab === "finish" && <div className="tab-content" role="tabpanel">
+          <div className="finish-preview" style={{ background: `linear-gradient(${angle}deg, ${primary}, ${accent})` }} />
+          <Toggle label="Use gradient" note="Blend primary and accent" checked={gradient} onChange={setGradient} />
+          <Toggle label="Paper grain" note="Add a tactile gallery finish" checked={grain} onChange={setGrain} />
+          <label className="range-control space-above"><span><b>Gradient angle</b><small>{angle}°</small></span><input type="range" min="0" max="360" value={angle} onChange={(event) => setAngle(Number(event.target.value))} disabled={!gradient} /></label>
+          <div className="contrast-card"><span className="contrast-sample" style={{ background: paper, color: ink }}>Aa</span><span><strong>{ratio.toFixed(1)} : 1</strong><small>Text contrast · {ratio >= 7 ? "AAA" : ratio >= 4.5 ? "AA" : "Needs work"}</small></span><i className={ratio >= 4.5 ? "pass" : "fail"}>{ratio >= 4.5 ? "Pass" : "Check"}</i></div>
+        </div>}
+
+        <div className="panel-footer"><button className="button button-paper" onClick={remix}><RefreshCw size={14} /> Remix</button><button className="button button-dark" onClick={exportCss}><Download size={14} /> Export system</button></div>
+      </aside>
+
+      <div className="canvas-area">
+        <div className="canvas-meta"><span>Live composition</span><span>{palette.name} · {pairing.name}</span></div>
+        <article className={`art-canvas ${grain ? "with-grain" : ""}`} style={canvasStyle}>
+          <div className="canvas-header"><span className="canvas-brand">Atelier <i>Forma</i></span><span className="canvas-index">Collection / 04—26</span><button style={{ color: ink }}>Enquire <span>↗</span></button></div>
+          <div className="canvas-body">
+            <div className="artwork" aria-label="Abstract brand artwork"><div className={`artwork-ground ${gradient ? "gradient" : ""}`} /><div className="artwork-sun" /><div className="artwork-arch" /><div className="artwork-line one" /><div className="artwork-line two" /><span className="artwork-number">No. 18</span></div>
+            <div className="canvas-copy"><p className="canvas-kicker">Visual study · {palette.name}</p><h3 style={{ fontSize: `clamp(48px, ${typeSize / 12}vw, ${typeSize}px)` }}>{headline || "Your story starts here."}</h3><div className="canvas-notes"><p>A considered identity for ideas with texture, purpose and a point of view.</p><div><span>Direction</span><strong>{palette.note.split(" · ").slice(0, 2).join(" / ")}</strong></div></div></div>
+          </div>
+          <div className="canvas-footer"><span>Identity / Digital / Print</span><span>Lisbon—London</span></div>
+        </article>
+        <div className="canvas-actions"><div className="large-swatches">{colors.map((color, index) => <button key={`${color}-${index}`} style={{ background: color }} onClick={() => navigator.clipboard.writeText(color).then(() => announce(`${color} copied`))} aria-label={`Copy ${color}`}><span>{color}</span></button>)}</div><p><Sparkles size={13} /> Every decision updates the composition instantly.</p></div>
       </div>
     </section>
+
+    <section className="collections" id="collections">
+      <div className="collection-heading"><div><p className="kicker">Curated starting points</p><h2>Choose a visual direction.</h2></div><p>Each collection balances colour, typography and contrast—ready to refine in the studio.</p></div>
+      <div className="collection-grid">{palettes.slice(0, 4).map((item, index) => <button key={item.name} className="collection-card" onClick={() => { choosePalette(index); document.querySelector("#studio")?.scrollIntoView({ behavior: "smooth" }); }}><span className="collection-art" style={{ background: item.colors[3] }}><i style={{ background: item.colors[0] }} /><i style={{ background: item.colors[1] }} /><i style={{ borderColor: item.colors[4] }} /></span><span className="collection-info"><strong>{String(index + 1).padStart(2, "0")} · {item.name}</strong><small>{item.note}</small></span></button>)}</div>
+    </section>
+
+    <footer id="about"><div><span className="brand-monogram">BB</span><strong>Good design begins with a point of view.</strong></div><p>BrandBlender turns colour and type into a coherent visual language—simply, accessibly and beautifully.</p><button className="button button-light" onClick={() => document.querySelector("#studio")?.scrollIntoView({ behavior: "smooth" })}>Create your system <span>↗</span></button></footer>
+    <div className={`toast ${message ? "visible" : ""}`} role="status"><Check size={14} /> {message}</div>
   </main>;
 }
-function Range({label,value,setValue}:{label:string,value:number,setValue:(v:number)=>void}) { return <label className="block"><span className="mb-2 flex justify-between text-xs font-bold"><span>{label}</span><span className="text-black/35">{value}</span></span><input className="w-full accent-black" type="range" value={value} onChange={e=>setValue(+e.target.value)}/></label> }
-function Pill({children}:{children:React.ReactNode}) { return <button className="flex items-center gap-1.5 rounded-full border border-black/15 bg-[#f6f6f3] px-3 py-2 text-xs font-bold"><Lock size={11}/>{children}</button> }
-function Panel({title,children}:{title:string,children:React.ReactNode}) { return <section className="rounded-2xl border border-black/10 bg-white p-4"><p className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-[.12em]"><Sparkles size={12}/>{title}</p>{children}</section> }
-function Score({label,value}:{label:string,value:number}) { return <div className="mt-3"><div className="mb-1 flex justify-between text-xs"><span className="font-semibold text-black/55">{label}</span><strong>{value}%</strong></div><div className="h-1.5 overflow-hidden rounded-full bg-black/8"><div className="h-full rounded-full bg-[#1640D6]" style={{width:`${value}%`}}/></div></div> }
+
+function Toggle({ label, note, checked, onChange }: { label: string; note: string; checked: boolean; onChange: (value: boolean) => void }) {
+  return <label className="toggle-row"><span><strong>{label}</strong><small>{note}</small></span><input type="checkbox" checked={checked} onChange={(event) => onChange(event.target.checked)} /><i /></label>;
+}
