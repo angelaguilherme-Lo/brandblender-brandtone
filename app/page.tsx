@@ -15,7 +15,7 @@ const palettes: Palette[] = [
 ];
 
 const typePairs: TypePair[] = [
-  { name: "Gallery Modern", mood: "Editorial with a clean edge", display: "Instrument Serif", body: "Manrope" },
+  { name: "Gallery Modern", mood: "Editorial with a clean edge", display: "Playfair Display", body: "Manrope" },
   { name: "Quiet Classic", mood: "Literary and considered", display: "Cormorant Garamond", body: "Libre Baskerville" },
   { name: "Modernist", mood: "Direct, graphic and contemporary", display: "Space Grotesk", body: "IBM Plex Mono" },
 ];
@@ -28,7 +28,7 @@ const tabs = [
 type Tab = (typeof tabs)[number]["id"];
 
 const fontFamilies: Record<string, string> = {
-  "Instrument Serif": "var(--font-instrument)",
+  "Playfair Display": "var(--font-playfair)",
   Manrope: "var(--font-manrope)",
   "Cormorant Garamond": "var(--font-cormorant)",
   "Libre Baskerville": "var(--font-libre)",
@@ -123,9 +123,9 @@ export default function Home() {
         </div>}
 
         {activeTab === "type" && <div className="tab-content" role="tabpanel">
-          <label className="text-control"><span>Preview text</span><textarea value={headline} maxLength={64} onChange={(event) => setHeadline(event.target.value)} /></label>
+          <label className="text-control"><span>Preview text</span><textarea style={{ fontFamily: displayFont, fontStyle: "normal" }} value={headline} maxLength={64} onChange={(event) => setHeadline(event.target.value)} /></label>
           <div className="control-title space-above"><span>Font pairings</span><small>Curated</small></div>
-          <div className="type-list">{typePairs.map((pair, index) => <button key={pair.name} onClick={() => { setTypeIndex(index); announce(`${pair.name} applied`); }} className={typeIndex === index ? "selected" : ""}><span className="type-glyph" style={{ fontFamily: `${fontFamilies[pair.display]}, serif` }}>Ag</span><span><strong>{pair.name}</strong><small>{pair.display} + {pair.body}</small><em>{pair.mood}</em></span>{typeIndex === index && <Check size={15} />}</button>)}</div>
+          <div className="type-list">{typePairs.map((pair, index) => <label key={pair.name} className={typeIndex === index ? "selected" : ""}><input className="type-radio" type="radio" name="type-pairing" checked={typeIndex === index} onChange={() => { setTypeIndex(index); announce(`${pair.name} applied`); }} /><span className="type-glyph" style={{ fontFamily: `${fontFamilies[pair.display]}, serif`, fontStyle: "normal" }}>Ag</span><span><strong>{pair.name}</strong><small>{pair.display} + {pair.body}</small><em>{pair.mood}</em></span>{typeIndex === index && <Check size={15} />}</label>)}</div>
           <label className="range-control space-above"><span><b>Display size</b><small>{typeSize}px</small></span><input type="range" min="48" max="104" value={typeSize} onChange={(event) => setTypeSize(Number(event.target.value))} /></label>
         </div>}
 
@@ -142,7 +142,7 @@ export default function Home() {
 
       <div className="canvas-area">
         <div className="canvas-meta"><span>Live composition</span><span>{palette.name} · {pairing.name}</span></div>
-        <article key={pairing.name} className={`art-canvas ${grain ? "with-grain" : ""}`} style={{ ...canvasStyle, fontFamily: bodyFont }} data-type-pairing={pairing.name}>
+        <article key={pairing.name} className={`art-canvas type-pair-${typeIndex} ${grain ? "with-grain" : ""}`} style={{ ...canvasStyle, fontFamily: bodyFont, fontStyle: "normal" }} data-type-pairing={pairing.name}>
           <div className="canvas-header"><span className="canvas-brand">Atelier <i>Forma</i></span><span className="canvas-index">Collection / 04—26</span></div>
           <div className="canvas-body">
             <div className="artwork" aria-label="Abstract brand artwork"><div className={`artwork-ground ${gradient ? "gradient" : ""}`} /><span className="artwork-number">No. 18</span></div>
