@@ -2,17 +2,17 @@
 @import "tw-animate-css";
 @import "../vendor/shadcn-tailwind-4.13.0.css";
 
-:root { --gallery: #ffffff; --paper: #fdfbf6; --ink: #1f1f1b; --rule: rgba(31,31,27,.16); --muted: rgba(31,31,27,.56); }
+:root { --gallery: #ffffff; --paper: #ffffff; --ink: #1f1f1b; --rule: rgba(31,31,27,.16); --muted: rgba(31,31,27,.56); }
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; background: #ffffff; }
 body { margin: 0; background: var(--gallery); color: var(--ink); font-family: var(--font-manrope), Arial, sans-serif; }
 button, input, textarea { font: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
 button { color: inherit; cursor: pointer; }
 a { color: inherit; text-decoration: none; }
-.site-shell { min-height: 100vh; overflow: hidden; }
+.site-shell { min-height: 100vh; overflow: hidden; background: #ffffff; }
 
-.topbar { height: 76px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 28px; padding: 0 3.3vw; border-bottom: 1px solid var(--rule); background: rgba(255,255,255,.9); backdrop-filter: blur(16px); position: relative; z-index: 10; }
+.topbar { height: 76px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 28px; padding: 0 3.3vw; border-bottom: 1px solid var(--rule); background: #ffffff; position: relative; z-index: 10; }
 .brand { justify-self: start; display: flex; align-items: center; gap: 12px; font-size: 13px; font-weight: 700; letter-spacing: -.02em; }
 .brand em { font-family: var(--font-manrope), sans-serif; font-style: normal; font-weight: 500; }
 .brand-monogram { width: 34px; height: 34px; display: grid; place-items: center; border: 1px solid currentColor; border-radius: 50%; font-family: var(--font-space), sans-serif; font-size: 10px; font-weight: 500; letter-spacing: -.09em; }
@@ -38,7 +38,7 @@ a { color: inherit; text-decoration: none; }
 .edition-mark span { font-family: var(--font-manrope), sans-serif; font-size: 42px; font-weight: 500; }
 .edition-mark small { font-size: 8px; letter-spacing: .25em; text-transform: uppercase; }
 
-.studio { width: calc(100% - 6.6vw); max-width: 1600px; min-height: 810px; margin: 0 auto 120px; display: grid; grid-template-columns: 370px minmax(0,1fr); background: var(--paper); border: 1px solid rgba(31,31,27,.25); box-shadow: 0 26px 80px rgba(40,32,20,.09); }
+.studio { width: calc(100% - 6.6vw); max-width: 1600px; min-height: 810px; margin: 0 auto 120px; display: grid; grid-template-columns: 370px minmax(0,1fr); background: #ffffff; border: 1px solid rgba(31,31,27,.25); box-shadow: 0 26px 80px rgba(40,32,20,.09); }
 .tool-panel { display: flex; flex-direction: column; border-right: 1px solid var(--rule); min-width: 0; }
 .panel-heading { min-height: 105px; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 22px 24px; border-bottom: 1px solid var(--rule); }
 .panel-heading .kicker { margin-bottom: 8px; }
@@ -110,7 +110,7 @@ a { color: inherit; text-decoration: none; }
 .contrast-card > i.fail { background: #f1d8d2; color: #7d2a20; }
 .panel-footer { display: grid; grid-template-columns: .8fr 1.2fr; gap: 8px; padding: 16px 22px; border-top: 1px solid var(--rule); }
 
-.canvas-area { min-width: 0; display: flex; flex-direction: column; padding: 22px; background: #f0ece3; }
+.canvas-area { min-width: 0; display: flex; flex-direction: column; padding: 22px; background: #ffffff; }
 .canvas-meta { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 8px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
 .canvas-meta span:last-child { color: rgba(31,31,27,.5); }
 .art-canvas { flex: 1; min-height: 700px; display: flex; flex-direction: column; overflow: hidden; background: var(--paper); color: var(--ink); position: relative; isolation: isolate; animation: type-swap .22s ease; }
