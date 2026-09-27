@@ -1,0 +1,24 @@
+name: Import BrandBlender source
+on:
+  push:
+    paths:
+      - brandblender-source.tar.gz
+permissions:
+  contents: write
+jobs:
+  import-source:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Unpack verified source
+        run: |
+          tar -xzf brandblender-source.tar.gz
+          rm brandblender-source.tar.gz
+          rm -f .github/workflows/unpack.yml
+      - name: Commit application
+        run: |
+          git config user.name "Angela Guilherme"
+          git config user.email "contact@angela-guilherme.com"
+          git add -A
+          git commit -m "Add BrandBlender BrandTone application"
+          git push
