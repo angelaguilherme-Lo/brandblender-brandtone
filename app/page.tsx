@@ -69,7 +69,18 @@ export default function Home() {
   function remix() { const next = (paletteIndex + 1 + Math.floor(Math.random() * (palettes.length - 1))) % palettes.length; choosePalette(next); }
   function cssTokens() { return `:root {\n  --colour-primary: ${primary};\n  --colour-accent: ${accent};\n  --colour-soft: ${soft};\n  --colour-paper: ${paper};\n  --colour-ink: ${ink};\n  --font-display: "${pairing.display}", serif;\n  --font-body: "${pairing.body}", sans-serif;\n  --gradient-angle: ${angle}deg;\n}`; }
   async function copyPalette() { await navigator.clipboard.writeText(colors.join(", ")); announce("Palette copied"); }
-  function exportCss() { const blob = new Blob([cssTokens()], { type: "text/css" }); const url = URL.createObjectURL(blob); const link = document.createElement("a"); link.href = url; link.download = "brandblender-tokens.css"; link.click(); URL.revokeObjectURL(url); announce("CSS exported"); }
+  function exportCss() {
+    const blob = new Blob([cssTokens()], { type: "text/css;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "brandblender-tokens.css";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    announce("CSS exported");
+  }
 
   const canvasStyle = { "--primary": primary, "--accent": accent, "--soft": soft, "--paper": paper, "--ink": ink, "--angle": `${angle}deg`, "--display-font": displayFont, "--body-font": bodyFont } as CSSProperties;
 
