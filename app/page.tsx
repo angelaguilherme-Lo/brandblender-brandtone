@@ -27,6 +27,15 @@ const tabs = [
 ] as const;
 type Tab = (typeof tabs)[number]["id"];
 
+const fontFamilies: Record<string, string> = {
+  "Instrument Serif": "var(--font-instrument)",
+  Manrope: "var(--font-manrope)",
+  "Cormorant Garamond": "var(--font-cormorant)",
+  "Libre Baskerville": "var(--font-libre)",
+  "Space Grotesk": "var(--font-space)",
+  "IBM Plex Mono": "var(--font-ibm-mono)",
+};
+
 function hexToRgb(hex: string) {
   const value = hex.replace("#", "");
   return { r: parseInt(value.slice(0, 2), 16), g: parseInt(value.slice(2, 4), 16), b: parseInt(value.slice(4, 6), 16) };
@@ -60,7 +69,7 @@ export default function Home() {
   const palette = palettes[paletteIndex], pairing = typePairs[typeIndex];
   const [primary, accent, soft, paper, ink] = colors;
   const ratio = useMemo(() => contrast(ink, paper), [ink, paper]);
-  const displayFont = `'${pairing.display}', Georgia, serif`, bodyFont = `'${pairing.body}', Arial, sans-serif`;
+  const displayFont = `${fontFamilies[pairing.display]}, Georgia, serif`, bodyFont = `${fontFamilies[pairing.body]}, Arial, sans-serif`;
 
   function announce(text: string) { setMessage(text); window.setTimeout(() => setMessage(""), 1800); }
   function choosePalette(index: number) { setPaletteIndex(index); setColors(palettes[index].colors); announce(`${palettes[index].name} applied`); }
@@ -116,7 +125,7 @@ export default function Home() {
         {activeTab === "type" && <div className="tab-content" role="tabpanel">
           <label className="text-control"><span>Preview text</span><textarea value={headline} maxLength={64} onChange={(event) => setHeadline(event.target.value)} /></label>
           <div className="control-title space-above"><span>Font pairings</span><small>Curated</small></div>
-          <div className="type-list">{typePairs.map((pair, index) => <button key={pair.name} onClick={() => { setTypeIndex(index); announce(`${pair.name} applied`); }} className={typeIndex === index ? "selected" : ""}><span className="type-glyph" style={{ fontFamily: `'${pair.display}', serif` }}>Ag</span><span><strong>{pair.name}</strong><small>{pair.display} + {pair.body}</small><em>{pair.mood}</em></span>{typeIndex === index && <Check size={15} />}</button>)}</div>
+          <div className="type-list">{typePairs.map((pair, index) => <button key={pair.name} onClick={() => { setTypeIndex(index); announce(`${pair.name} applied`); }} className={typeIndex === index ? "selected" : ""}><span className="type-glyph" style={{ fontFamily: `${fontFamilies[pair.display]}, serif` }}>Ag</span><span><strong>{pair.name}</strong><small>{pair.display} + {pair.body}</small><em>{pair.mood}</em></span>{typeIndex === index && <Check size={15} />}</button>)}</div>
           <label className="range-control space-above"><span><b>Display size</b><small>{typeSize}px</small></span><input type="range" min="48" max="104" value={typeSize} onChange={(event) => setTypeSize(Number(event.target.value))} /></label>
         </div>}
 
