@@ -1,7 +1,7 @@
 "use client";
 
 import { CSSProperties, useMemo, useState } from "react";
-import { ArrowDown, Check, Copy, Download, Palette as PaletteIcon, RefreshCw, SlidersHorizontal, Sparkles, Type } from "lucide-react";
+import { ArrowDown, Check, Copy, Download, Palette as PaletteIcon, RefreshCw, SlidersHorizontal, Type } from "lucide-react";
 
 type Palette = { name: string; note: string; colors: [string, string, string, string, string] };
 type TypePair = { name: string; mood: string; display: string; body: string };
@@ -150,7 +150,7 @@ export default function Home() {
           </div>
           <div className="canvas-footer"><span>Identity / Digital / Print</span></div>
         </article>
-        <div className="canvas-actions"><div className="large-swatches">{colors.map((color, index) => <button key={`${color}-${index}`} style={{ background: color }} onClick={() => navigator.clipboard.writeText(color).then(() => announce(`${color} copied`))} aria-label={`Copy ${color}`}><span>{color}</span></button>)}</div><p><Sparkles size={13} /> Every decision updates the composition instantly.</p></div>
+        <div className="canvas-actions"><div className="large-swatches">{colors.map((color, index) => <button key={`${color}-${index}`} style={{ background: color }} onClick={() => navigator.clipboard.writeText(color).then(() => announce(`${color} copied`))} aria-label={`Copy ${color}`}><span>{color}</span></button>)}</div></div>
       </div>
     </section>
 
