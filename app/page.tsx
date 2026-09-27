@@ -1,7 +1,7 @@
 "use client";
 
 import { CSSProperties, useMemo, useState } from "react";
-import { ArrowDown, Check, Copy, Download, Palette as PaletteIcon, RefreshCw, SlidersHorizontal, Type } from "lucide-react";
+import { ArrowDown, ArrowUpRight, Check, Copy, Download, Palette as PaletteIcon, RefreshCw, SlidersHorizontal, Type } from "lucide-react";
 
 type Palette = { name: string; note: string; colors: [string, string, string, string, string] };
 type TypePair = { name: string; mood: string; display: string; body: string };
@@ -159,7 +159,7 @@ export default function Home() {
       <div className="collection-grid">{palettes.slice(0, 4).map((item, index) => <button key={item.name} className="collection-card" onClick={() => { choosePalette(index); document.querySelector("#studio")?.scrollIntoView({ behavior: "smooth" }); }}><span className="collection-art" style={{ background: item.colors[3] }}><i style={{ background: item.colors[0] }} /><i style={{ background: item.colors[1] }} /><i style={{ borderColor: item.colors[4] }} /></span><span className="collection-info"><strong>{String(index + 1).padStart(2, "0")} · {item.name}</strong><small>{item.note}</small></span></button>)}</div>
     </section>
 
-    <footer id="about"><div><span className="brand-monogram">BB</span><strong>Good design begins with a point of view.</strong></div><p>BrandBlender turns colour and type into a coherent visual language—simply, accessibly and beautifully.<span className="creator-credit">Designed and developed by Angela Guilherme.</span></p><button className="button button-light" onClick={() => document.querySelector("#studio")?.scrollIntoView({ behavior: "smooth" })}>Create your system <span>↗</span></button></footer>
+    <footer id="about"><div><span className="brand-monogram">BB</span><strong>Good design begins with a point of view.</strong></div><p>BrandBlender turns colour and type into a coherent visual language—simply, accessibly and beautifully.<span className="creator-credit">Designed and developed by Angela Guilherme.</span></p><button className="button button-light" onClick={() => document.querySelector("#studio")?.scrollIntoView({ behavior: "smooth" })}>Create your system <ArrowUpRight size={15} aria-hidden="true" /></button></footer>
     <div className={`toast ${message ? "visible" : ""}`} role="status"><Check size={14} /> {message}</div>
   </main>;
 }
